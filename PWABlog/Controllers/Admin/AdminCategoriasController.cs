@@ -2,111 +2,159 @@
 using PWABlog.Models.Blog.Categoria;
 using PWABlog.RequestModels.AdminCategorias;
 using System;
+using PWABlog.ViewModels.Admin;
 
 namespace PWABlog.Controllers.Admin
 {
-	public class AdminCategoriasController : Controller
-	{
-		private readonly CategoriaOrmService _categoriaOrmService;
+    public class AdminCategoriasController : Controller
+    {
+        private readonly CategoriaOrmService _categoriaOrmService;
 
-		public AdminCategoriasController(
-				CategoriaOrmService categoriaOrmService
-		)
-		{
-			_categoriaOrmService = categoriaOrmService;
-		}
+        public AdminCategoriasController(
+            CategoriaOrmService categoriaOrmService
+        )
+        {
+            _categoriaOrmService = categoriaOrmService;
+        }
 
-		[HttpGet]
-		public IActionResult Listar()
-		{
-			return View();
-		}
+        [HttpGet]
+        public IActionResult Listar()
+        {
+            AdminCategoriasListarViewModel model = new AdminCategoriasListarViewModel();
 
-		[HttpGet]
-		public IActionResult Detalhar()
-		{
-			return View();
-		}
+            // Obter as Categorias
+            var listaCategorias = _categoriaOrmService.ObterCategorias();
 
-		[HttpGet]
-		public IActionResult Criar()
-		{
-			ViewBag.erro = TempData["erro-msg"];
+            // Alimentar o model com as etiquetas que serão listadas
+            foreach (var categoriaEntity in listaCategorias)
+            {
+                var categoriaAdminCategorias = new CategoriaAdminCategorias();
+                categoriaAdminCategorias.Id = categoriaEntity.Id;
+                categoriaAdminCategorias.Nome = categoriaEntity.Nome;
 
-			return View();
-		}
+                model.Categorias.Add(categoriaAdminCategorias);
+            }
 
-		[HttpPost]
-		public RedirectToActionResult Criar(AdminCategoriasCriarRequestModel request)
-		{
-			var nome = request.Nome;
 
-			try
-			{
-				_categoriaOrmService.CriarCategoria(nome);
-			}
-			catch (Exception exception)
-			{
-				TempData["erro-msg"] = exception.Message;
-				return RedirectToAction("Criar");
-			}
+            return View(model);
+        }
 
-			return RedirectToAction("Listar");
-		}
+        [HttpGet]
+        public IActionResult Detalhar()
+        {
+            return View();
+        }
 
-		[HttpGet]
-		public IActionResult Editar(int id)
-		{
-			ViewBag.id = id;
-			ViewBag.erro = TempData["erro-msg"];
+        [HttpGet]
+        public IActionResult Criar()
+        {
+            AdminCategoriasCriarViewModel model = new AdminCategoriasCriarViewModel();
 
-			return View();
-		}
+            model.Erro = (string)TempData["erro-msg"];
 
-		[HttpPost]
-		public RedirectToActionResult Editar(AdminCategoriasEditarRequestModel request)
-		{
-			var id = request.Id;
-			var nome = request.Nome;
+            return View(model);
+        }
 
-			try
-			{
-				_categoriaOrmService.EditarCategoria(id, nome);
-			}
-			catch (Exception exception)
-			{
-				TempData["erro-msg"] = exception.Message;
-				return RedirectToAction("Editar", new { id = id });
-			}
+        [HttpPost]
+        public RedirectToActionResult Criar(AdminCategoriasCriarRequestModel request)
+        {
+            var nome = request.Nome;
 
-			return RedirectToAction("Listar");
-		}
+            try
+            {
+                _categoriaOrmService.CriarCategoria(nome);
+            }
+            catch (Exception exception)
+            {
+                TempData["erro-msg"] = exception.Message;
+                return RedirectToAction("Criar");
+            }
 
-		[HttpGet]
-		public IActionResult Remover(int id)
-		{
-			ViewBag.id = id;
-			ViewBag.erro = TempData["erro-msg"];
+            return RedirectToAction("Listar");
+        }
 
-			return View();
-		}
+        [HttpGet]
+        public IActionResult Editar(int id)
+        {
+            AdminCategoriasEditarViewModel model = new AdminCategoriasEditarViewModel();
 
-		[HttpPost]
-		public RedirectToActionResult Remover(AdminCategoriasRemoverRequestModel request)
-		{
-			var id = request.Id;
+            // Obter categoria a editar
+            var categoriaAEditar = _categoriaOrmService.ObterCategoriaPorId(id);
+            if (categoriaAEditar == null)
+            {
+                return RedirectToAction("Listar");
+            }
 
-			try
-			{
-				_categoriaOrmService.RemoverCategoria(id);
-			}
-			catch (Exception exception)
-			{
-				TempData["erro-msg"] = exception.Message;
-				return RedirectToAction("Remover", new { id = id });
-			}
+            // Definir possível erro de processamento (vindo do post do criar)
+            model.Erro = (string)TempData["erro-msg"];
 
-			return RedirectToAction("Listar");
-		}
-	}
+            // Alimentar o model com os dados da categoria a ser editada
+
+            model.IdCategoria = categoriaAEditar.Id;
+            model.NomeCategoria = categoriaAEditar.Nome;
+            model.TituloPagina += model.NomeCategoria;
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public RedirectToActionResult Editar(AdminCategoriasEditarRequestModel request)
+        {
+            var id = request.Id;
+            var nome = request.Nome;
+
+            try
+            {
+                _categoriaOrmService.EditarCategoria(id, nome);
+            }
+            catch (Exception exception)
+            {
+                TempData["erro-msg"] = exception.Message;
+                return RedirectToAction("Editar", new { id = id });
+            }
+
+            return RedirectToAction("Listar");
+        }
+
+        [HttpGet]
+        public IActionResult Remover(int id)
+        {
+            AdminCategoriasRemoverViewModel model = new AdminCategoriasRemoverViewModel();
+
+            // Obter etiqueta a remover
+            var ARemover = _categoriaOrmService.ObterCategoriaPorId(id);
+            if (ARemover == null)
+            {
+                return RedirectToAction("Listar");
+            }
+
+            // Definir possível erro de processamento (vindo do post do criar)
+            model.Erro = (string)TempData["erro-msg"];
+
+            // Alimentar o model com os dados da etiqueta a ser editada
+            model.IdCategoria = ARemover.Id;
+            model.NomeCategoria = ARemover.Nome;
+            model.TituloPagina += model.NomeCategoria;
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public RedirectToActionResult Remover(AdminCategoriasRemoverRequestModel request)
+        {
+            var id = request.Id;
+
+            try
+            {
+                _categoriaOrmService.RemoverCategoria(id);
+            }
+            catch (Exception exception)
+            {
+                TempData["erro-msg"] = exception.Message;
+                return RedirectToAction("Remover", new { id = id });
+            }
+
+            return RedirectToAction("Listar");
+        }
+    }
 }

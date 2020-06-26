@@ -12,8 +12,8 @@ using PWABlog.ViewModels.Home;
 
 namespace PWABlog.Controllers
 {
-    public class HomeController : Controller
-    {
+ public class HomeController : Controller
+ {
 
         private readonly ILogger<HomeController> _logger;
         private readonly CategoriaOrmService _categoriaOrmService;
@@ -28,12 +28,12 @@ namespace PWABlog.Controllers
             _categoriaOrmService = categoriaOrmService;
             _postagemOrmService = postagemOrmService;
         }
-
         public IActionResult Index()
-        {   
+        {
             // Instanciar a ViewModel
             HomeIndexViewModel model = new HomeIndexViewModel();
             model.TituloPagina = "Página Home";
+            
             
             // Alimentar a lista de postagens que serão exibidas na view
             List<PostagemEntity> listaPostagens = _postagemOrmService.ObterPostagens();
@@ -46,10 +46,9 @@ namespace PWABlog.Controllers
                 postagemHomeIndex.Categoria = postagem.Categoria.Nome;
                 postagemHomeIndex.NumeroComentarios = postagem.Comentarios.Count.ToString();
                 postagemHomeIndex.PostagemId = postagem.Id.ToString();
-								postagemHomeIndex.DataPostagem = postagem.DataPostagem;
-
-				// Obter última revisão
-				RevisaoEntity ultimaRevisao = postagem.Revisoes.OrderByDescending(o => o.DataCriacao).FirstOrDefault();
+                
+                // Obter última revisão
+                RevisaoEntity ultimaRevisao = postagem.Revisoes.OrderByDescending(o => o.DataCriacao).FirstOrDefault();
                 if (ultimaRevisao != null)
                 {
                     postagemHomeIndex.Data = ultimaRevisao.DataCriacao.ToLongDateString();
@@ -79,11 +78,25 @@ namespace PWABlog.Controllers
                     model.Etiquetas.Add(etiquetaHomeIndex);
                 }
             }
-            
-            
+
             // Alimentar a lista de postagens populares que serão exibidas na view
             // TODO Obter lista de postagens populares
-            
+            List<PostagemEntity> listaPostagensPopulares = _postagemOrmService.ObterPostagensPopulares();
+            int count = 0;
+            foreach (PostagemEntity postagem in listaPostagensPopulares)
+            {
+                PostagemPopularHomeIndex postagemPopularHomeIndex = new PostagemPopularHomeIndex();
+                postagemPopularHomeIndex.Titulo = postagem.Titulo;
+                postagemPopularHomeIndex.Categoria = postagem.Categoria.Nome;
+                postagemPopularHomeIndex.PostagemId = postagem.Id.ToString();
+
+                count++;
+
+                if (count <= 4)
+                {
+                    model.PostagensPopulares.Add(postagemPopularHomeIndex);
+                }
+            }
             
             return View(model);
         }

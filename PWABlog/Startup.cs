@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -101,17 +96,16 @@ namespace PWABlog
                         action = "Index"
                     }
                 );
-
                 // Rotas do Controle de Acesso
                 endpoints.MapControllerRoute(
-                   name: "controleDeAcesso",
-                   pattern: "acesso/{action}",
-                   defaults: new
-                   {
-                       controller = "ControleDeAcesso",
-                       action = "Login"
-                   }
-               );
+                    name: "controleDeAcesso",
+                    pattern: "acesso/{action}",
+                    defaults: new
+                    {
+                        controller = "ControleDeAcesso",
+                        action = "Login"
+                    }
+                );
 
                 // Rotas da Área Administrativa
                 endpoints.MapControllerRoute(
@@ -124,32 +118,37 @@ namespace PWABlog
                     });
 
                 endpoints.MapControllerRoute(
-                      name: "admin.categorias",
-                      pattern: "admin/categorias/{action}/{id?}",
-                      defaults: new
-                      {
-                          controller = "AdminCategorias",
-                          action = "Listar"
-                      });
+                    name: "admin.categorias",
+                    pattern: "admin/categorias/{action}/{id?}",
+                    defaults: new
+                    {
+                        controller = "AdminCategorias",
+                        action = "Listar"
+                    });
 
                 endpoints.MapControllerRoute(
-                   name: "admin.etiquetas",
-                   pattern: "admin/etiquetas/{action}/{id?}",
-                   defaults: new
-                   {
-                       controller = "AdminEtiquetas",
-                       action = "Listar"
-                   });
+                    name: "admin.etiquetas",
+                    pattern: "admin/etiquetas/{action}/{id?}",
+                    defaults: new
+                    {
+                        controller = "AdminEtiquetas",
+                        action = "Listar"
+                    });
 
                 endpoints.MapControllerRoute(
-                   name: "admin.postagens",
-                   pattern: "admin/postagens/{action}/{id?}",
-                   defaults: new
-                   {
-                       controller = "AdminPostagens",
-                       action = "Listar"
-                   });
-            });
+                    name: "admin.postagens",
+                    pattern: "admin/postagens/{action}/{id?}",
+                    defaults: new
+                    {
+                        controller = "AdminPostagens",
+                        action = "Listar"
+                    });
+                endpoints.MapControllerRoute(
+                    name: "admin.autores",
+                    pattern: "admin/autores/{action}/{id?}",
+                    defaults: new { controller = "AdminAutores", action = "Listar" }
+                );
+        });
 		}
 	}
 }
